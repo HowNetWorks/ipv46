@@ -1,8 +1,8 @@
 {
   "name": "@hownetworks/ipv46",
   "version": "1.0.0",
-  "main": "dist/commonjs/ipv46.js",
-  "module": "dist/modules/ipv46.js",
+  "main": "build/commonjs/ipv46.js",
+  "module": "build/modules/ipv46.js",
   "author": "Joachim Viide <jviide@iki.fi>",
   "repository": "HowNetWorks/ipv46",
   "license": "MIT",
