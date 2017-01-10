@@ -24,7 +24,7 @@ console.log(ipv4.version); // 4
 console.log(ipv6.version); // 6
 
 // Address objects implement the toString method for turning the addresses back
-// into strings. The strings are printed lower-cased sans any  extra leading
+// into strings. The strings are printed lower-cased sans any extra leading
 // zeroes. IPv6 formatting follows the RFC 5952
 // (https://tools.ietf.org/html/rfc5952) recommendations.
 console.log(String(ipv4)); // 192.0.2.1
