@@ -22,6 +22,9 @@
   },
   "keywords": [
     "ip",
+    "ipv4",
+    "ipv6",
+    "rfc4291",
     "rfc5952"
   ]
 }
