@@ -23,12 +23,18 @@ const ipv6 = parseIP("2001:db8::1");
 console.log(ipv4.version); // 4
 console.log(ipv6.version); // 6
 
+// parseIP supports IPv6 addresses with embedded IPv4 addresses
+const ipv6embed = parseIP("2001:db8::192.0.2.1");
+console.log(ipv6.version); // 6
+
 // Address objects implement the toString method for turning the addresses back
 // into strings. The strings are printed lower-cased sans any extra leading
 // zeroes. IPv6 formatting follows the RFC 5952
-// (https://tools.ietf.org/html/rfc5952) recommendations.
+// (https://tools.ietf.org/html/rfc5952) recommendations, except that
+// Formatting doesn't output IPv6 addresses with embedded IPv4 addresses.
 console.log(String(ipv4)); // 192.0.2.1
 console.log(String(ipv6)); // 2001:db8::1
+console.log(String(ipv6embed)); // 2001:db8::c000:201
 
 // Method cmp(...) can be used to compare and sort addresses, and a.cmp(b)
 // returns:

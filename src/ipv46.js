@@ -16,12 +16,19 @@ function cmpSameLengthArrays(left, right) {
 
 const IPV4_REGEX = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)$/;
 
-function parseIPv4(string) {
+function parseIPv4Bytes(string) {
     const ipv4 = string.match(IPV4_REGEX);
     if (!ipv4) {
         return null;
     }
-    const bytes = ipv4.slice(1, 5).map(Number);
+    return ipv4.slice(1, 5).map(Number);
+}
+
+function parseIPv4(string) {
+    const bytes = parseIPv4Bytes(string);
+    if (!bytes) {
+        return null;
+    }
     return new IPv4(bytes);
 }
 
@@ -68,7 +75,7 @@ function formatHexWords(words, start, end) {
     return words.slice(start, end).map(w => w.toString(16)).join(":");
 }
 
-function parseIPv6(string) {
+function parseIPv6Words(string) {
     if (!IPV6_REGEX.test(string)) {
         return null;
     }
@@ -96,7 +103,30 @@ function parseIPv6(string) {
     if (idx >= 0 && head.length + tail.length > 7) {
         return null;
     }
-    const words = head.concat(IPV6_ZEROS.slice(0, 8 - head.length - tail.length), tail);
+    return head.concat(IPV6_ZEROS.slice(0, 8 - head.length - tail.length), tail);
+}
+
+function parseIPv6(string) {
+    const index = string.lastIndexOf(":");
+    if (index < 0) {
+        return null;
+    }
+
+    const bytes = parseIPv4Bytes(string.slice(index + 1));
+    if (bytes === null) {
+        const words = parseIPv6Words(string);
+        if (words === null) {
+            return null;
+        }
+        return new IPv6(words);
+    }
+
+    const words = parseIPv6Words(string.slice(0, index + 1) + "0:0");
+    if (words === null) {
+        return null;
+    }
+    words[6] = bytes[0] * 256 + bytes[1];
+    words[7] = bytes[2] * 256 + bytes[3];
     return new IPv6(words);
 }
 
@@ -142,13 +172,11 @@ class IPv6 {
 }
 
 export default function parseIP(string) {
-    if (string.indexOf(".") >= 0) {
-        return parseIPv4(string);
-    }
-
     if (string.indexOf(":") >= 0) {
         return parseIPv6(string);
+    } else if (string.indexOf(".") >= 0) {
+        return parseIPv4(string);
+    } else {
+        return null;
     }
-
-    return null;
 }
