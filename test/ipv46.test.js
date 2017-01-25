@@ -168,6 +168,46 @@ describe("IPv6", () => {
             const b = parseIP("1:0:3:4:5:6:7:8");
             expect(a.cmp(b)).toBe(0);
         });
+        it("accepts embedded IPv4 addresses after prefix 0:0:0:0:0:0", () => {
+            const a = parseIP("::192.0.2.1");
+            const b = parseIP("::c000:201");
+            expect(a.cmp(b)).toBe(0);
+        });
+        it("accepts embedded IPv4 addresses after prefix 0:0:0:0:0:ffff", () => {
+            const a = parseIP("::ffff:192.0.2.1");
+            const b = parseIP("::ffff:c000:201");
+            expect(a.cmp(b)).toBe(0);
+        });
+        it("accepts embedded IPv4 addresses after any 96-bit prefix", () => {
+            const a = parseIP("2001:db8::192.0.2.1");
+            const b = parseIP("2001:db8::c000:201");
+            expect(a.cmp(b)).toBe(0);
+        });
+        it("doesn't interpret a single trailing number between 0-255 as an octet", () => {
+            const a = parseIP("2001:db8::1ff");
+            const b = parseIP("2001:db8::255");
+            expect(a.cmp(b)).toBe(-1);
+        });
+        it("requires embedded IPv4 addresses to be well-formed", () => {
+            expect(parseIP("2001:db8::192.0.2.256")).toBeNull();
+            expect(parseIP("2001:db8::192.0.2.1.0")).toBeNull();
+            expect(parseIP("2001:db8::192.0.2")).toBeNull();
+            expect(parseIP("2001:db8::192.0")).toBeNull();
+            expect(parseIP("2001:db8::192.0.2.")).toBeNull();
+            expect(parseIP("2001:db8::.0.2.1")).toBeNull();
+        });
+        it("counts embedded IPv4 address as 2 words", () => {
+            expect(parseIP("1:2:3:4:5:6:7:8:192.0.2.1")).toBeNull();
+            expect(parseIP("1:2:3:4:5:6:7:192.0.2.1")).toBeNull();
+        });
+        it("disallows non-trailing IPv4 addresses", () => {
+            expect(parseIP("192.0.2.1::")).toBeNull();
+            expect(parseIP("0:192.0.2.1::")).toBeNull();
+            expect(parseIP("0:0:192.0.2.1::")).toBeNull();
+            expect(parseIP("::192.0.2.1:0:0:0")).toBeNull();
+            expect(parseIP("::192.0.2.1:0:0")).toBeNull();
+            expect(parseIP("::192.0.2.1:0")).toBeNull();
+        });
     });
 
     describe("formatting", () => {
