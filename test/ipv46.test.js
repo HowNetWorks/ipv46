@@ -242,6 +242,11 @@ describe("IPv6", () => {
             expect(String(parseIP("abcd:ef00::"))).toBe("abcd:ef00::");
             expect(String(parseIP("ABCD:EF00::"))).toBe("abcd:ef00::");
         });
+        it("doesn't output embedded IPv4 addresses", () => {
+            expect(String(parseIP("::192.0.2.1"))).toBe("::c000:201");
+            expect(String(parseIP("::ffff:192.0.2.1"))).toBe("::ffff:c000:201");
+            expect(String(parseIP("2001:db8::192.0.2.1"))).toBe("2001:db8::c000:201");
+        });
     });
 });
 
