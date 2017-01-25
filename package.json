@@ -1,6 +1,6 @@
 {
   "name": "@hownetworks/ipv46",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "main": "build/commonjs/ipv46.js",
   "module": "build/modules/ipv46.js",
   "author": "Joachim Viide <jviide@iki.fi>",
