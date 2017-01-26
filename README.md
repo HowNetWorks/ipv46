@@ -31,7 +31,7 @@ console.log(ipv6.version); // 6
 // into strings. The strings are printed lower-cased sans any extra leading
 // zeroes. IPv6 formatting follows the RFC 5952
 // (https://tools.ietf.org/html/rfc5952) recommendations, except that
-// Formatting doesn't output IPv6 addresses with embedded IPv4 addresses.
+// formatting doesn't output IPv6 addresses with embedded IPv4 addresses.
 console.log(String(ipv4)); // 192.0.2.1
 console.log(String(ipv6)); // 2001:db8::1
 console.log(String(ipv6embed)); // 2001:db8::c000:201
