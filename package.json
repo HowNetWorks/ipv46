@@ -4,6 +4,7 @@
   "description": "Parse, format and compare IPv4/6 addresses",
   "main": "dist/commonjs/ipv46.js",
   "module": "dist/module/ipv46.js",
+  "sideEffects": false,
   "author": "Joachim Viide <jviide@iki.fi>",
   "repository": "HowNetWorks/ipv46",
   "license": "MIT",
