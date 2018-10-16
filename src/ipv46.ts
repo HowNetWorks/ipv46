@@ -18,30 +18,28 @@ function parseIPv4Bytes(ipStr: string): number[] | null {
   return ipv4.slice(1, 5).map(Number);
 }
 
-function parseIPv4(ipStr: string) {
-  const bytes = parseIPv4Bytes(ipStr);
-  if (!bytes) {
-    return null;
-  }
-  return new IPv4(bytes);
-}
-
-class IPv4 {
-  readonly version = 4;
-
-  private _bytes: number[];
-  private _string: string | null;
-
-  constructor(bytes: number[]) {
-    this._bytes = bytes;
-    this._string = null;
-  }
-
-  cmp(other: IPv4 | IPv6): number {
-    if (other.version !== 4) {
-      return -1;
+export class IPv4 {
+  static parse(string: string): IPv4 | null {
+    if (string.indexOf(".") < 0) {
+      return null;
     }
-    return cmpSameLengthArrays(this._bytes, other._bytes);
+    const bytes = parseIPv4Bytes(string);
+    if (!bytes) {
+      return null;
+    }
+    return new IPv4(bytes);
+  }
+
+  static cmp(a: IPv4, b: IPv4): number {
+    return cmpSameLengthArrays(a._bytes, b._bytes);
+  }
+
+  readonly version = 4;
+  private readonly _bytes: number[];
+  private _string: string | null = null;
+
+  private constructor(bytes: number[]) {
+    this._bytes = bytes;
   }
 
   toString(): string {
@@ -111,30 +109,6 @@ function parseIPv6Words(ipStr: string): number[] | null {
   return head.concat(IPV6_ZEROS.slice(0, 8 - head.length - tail.length), tail);
 }
 
-function parseIPv6(string: string) {
-  const index = string.lastIndexOf(":");
-  if (index < 0) {
-    return null;
-  }
-
-  const bytes = parseIPv4Bytes(string.slice(index + 1));
-  if (bytes === null) {
-    const words = parseIPv6Words(string);
-    if (words === null) {
-      return null;
-    }
-    return new IPv6(words);
-  }
-
-  const words = parseIPv6Words(string.slice(0, index + 1) + "0:0");
-  if (words === null) {
-    return null;
-  }
-  words[6] = bytes[0] * 256 + bytes[1];
-  words[7] = bytes[2] * 256 + bytes[3];
-  return new IPv6(words);
-}
-
 function formatIPv6(words: number[]) {
   let currentRun = 0;
   let longestRun = 0;
@@ -161,22 +135,41 @@ function formatIPv6(words: number[]) {
   );
 }
 
-class IPv6 {
-  readonly version = 6;
+export class IPv6 {
+  static parse(string: string): IPv6 | null {
+    const index = string.lastIndexOf(":");
+    if (index < 0) {
+      return null;
+    }
 
-  private _words: any;
-  private _string: any;
+    const bytes = parseIPv4Bytes(string.slice(index + 1));
+    if (bytes === null) {
+      const words = parseIPv6Words(string);
+      if (words === null) {
+        return null;
+      }
+      return new IPv6(words);
+    }
 
-  constructor(words: number[]) {
-    this._words = words;
-    this._string = null;
+    const words = parseIPv6Words(string.slice(0, index + 1) + "0:0");
+    if (words === null) {
+      return null;
+    }
+    words[6] = bytes[0] * 256 + bytes[1];
+    words[7] = bytes[2] * 256 + bytes[3];
+    return new IPv6(words);
   }
 
-  cmp(other: IPv4 | IPv6): number {
-    if (other.version !== this.version) {
-      return 1;
-    }
-    return cmpSameLengthArrays(this._words, other._words);
+  static cmp(a: IPv6, b: IPv6): number {
+    return cmpSameLengthArrays(a._words, b._words);
+  }
+
+  readonly version = 6;
+  private readonly _words: number[];
+  private _string: string | null = null;
+
+  private constructor(words: number[]) {
+    this._words = words;
   }
 
   toString(): string {
@@ -187,12 +180,22 @@ class IPv6 {
   }
 }
 
-export default function parseIP(ipStr: string): IPv4 | IPv6 | null {
-  if (ipStr.indexOf(":") >= 0) {
-    return parseIPv6(ipStr);
-  } else if (ipStr.indexOf(".") >= 0) {
-    return parseIPv4(ipStr);
-  } else {
-    return null;
+export type IP = IPv4 | IPv6;
+
+export namespace IP {
+  export function parse(string: string): IP | null {
+    return IPv4.parse(string) || IPv6.parse(string);
+  }
+
+  export function cmp(a: IP, b: IP): number {
+    if (a.version === 6 && b.version === 6) {
+      return IPv6.cmp(a, b);
+    } else if (a.version === 4 && b.version === 4) {
+      return IPv4.cmp(a, b);
+    } else if (a.version !== b.version) {
+      return a.version < b.version ? -1 : 1;
+    } else {
+      throw new TypeError("type mismatch");
+    }
   }
 }
