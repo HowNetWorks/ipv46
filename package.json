@@ -10,7 +10,7 @@
   "license": "MIT",
   "scripts": {
     "test": "tsc --noEmit --skipLibCheck && mocha --require ts-node/register test/**/*.test.js",
-    "build": "rm -rf build && npm run build:commonjs && npm run build:module",
+    "build": "rm -rf dist && npm run build:commonjs && npm run build:module",
     "build:commonjs": "tsc",
     "build:module": "tsc --module es2015 --outDir dist/module",
     "prepublishOnly": "yarn run build"
