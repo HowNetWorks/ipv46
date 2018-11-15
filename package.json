@@ -10,7 +10,7 @@
   "repository": "HowNetWorks/ipv46",
   "license": "MIT",
   "scripts": {
-    "test": "tsc --noEmit --skipLibCheck && mocha --require ts-node/register test/**/*.test.js",
+    "test": "tsc --noEmit --skipLibCheck && TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --require ts-node/register test/**/*.test.js",
     "build": "rm -rf dist && microbundle --format es,cjs",
     "prepublishOnly": "yarn run build"
   },
