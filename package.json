@@ -1,6 +1,6 @@
 {
   "name": "@hownetworks/ipv46",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Parse, format and compare IPv4/6 addresses",
   "main": "dist/ipv46.js",
   "module": "dist/ipv46.mjs",
