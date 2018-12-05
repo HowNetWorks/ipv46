@@ -38,3 +38,5 @@ jspm_packages
 
 # Build directory
 /dist
+
+.rts2_cache*/
