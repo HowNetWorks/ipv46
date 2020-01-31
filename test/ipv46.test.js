@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { IP, IPv4, IPv6 } = require("../src/ipv46");
+const { IP, IPv4, IPv6, IPRange } = require("../src/ipv46");
 
 describe("IPv4", () => {
   describe("cmp()", () => {
@@ -290,6 +290,62 @@ describe("IP", () => {
       const d = IP.parse("::");
       const array = [a, b, c, d].sort(IP.cmp);
       expect(array).to.have.ordered.members([c, a, d, b]);
+    });
+  });
+});
+
+describe("IPRange", () => {
+  describe("parse()", () => {
+    it("disallows empty strings", () => {
+      expect(IPRange.parse("")).to.be.null;
+    });
+    it("disallows values with no . or :", () => {
+      expect(IPRange.parse("Hello, World!")).to.be.null;
+    });
+    it("supports single IP addresses", () => {
+      const r4 = IPRange.parse("1.2.3.255");
+      expect(String(r4.first)).to.equal("1.2.3.255");
+      expect(String(r4.last)).to.equal("1.2.3.255");
+
+      const r6 = IPRange.parse("1:2:3:ffff:5:6:7:8");
+      expect(String(r6.first)).to.equal("1:2:3:ffff:5:6:7:8");
+      expect(String(r6.last)).to.equal("1:2:3:ffff:5:6:7:8");
+    });
+    it("supports CIDRs", () => {
+      const r4 = IPRange.parse("1.2.3.255/25");
+      expect(String(r4.first)).to.equal("1.2.3.128");
+      expect(String(r4.last)).to.equal("1.2.3.255");
+
+      const r6 = IPRange.parse("1:2:3:ffff:5:6:7:8/49");
+      expect(String(r6.first)).to.equal("1:2:3:8000::");
+      expect(String(r6.last)).to.equal("1:2:3:ffff:ffff:ffff:ffff:ffff");
+    });
+    it("requires CIDR bits to be in correct ranges", () => {
+      expect(IPRange.parse("::/-1")).to.be.null;
+      expect(IPRange.parse("::/129")).to.be.null;
+      expect(IPRange.parse("0.0.0.0/-1")).to.be.null;
+      expect(IPRange.parse("0.0.0.0/33")).to.be.null;
+    });
+    it("supports explicit ranges", () => {
+      const r4 = IPRange.parse("1.2.3.4-2.2.3.4");
+      expect(String(r4.first)).to.equal("1.2.3.4");
+      expect(String(r4.last)).to.equal("2.2.3.4");
+
+      const r6 = IPRange.parse("1:2::-2:3::4");
+      expect(String(r6.first)).to.equal("1:2::");
+      expect(String(r6.last)).to.equal("2:3::4");
+    });
+    it("allows reversed ranges (reverses them implicitly)", () => {
+      const r4 = IPRange.parse("2.2.3.4-1.2.3.4");
+      expect(String(r4.first)).to.equal("1.2.3.4");
+      expect(String(r4.last)).to.equal("2.2.3.4");
+
+      const r6 = IPRange.parse("2:3::4-1:2::");
+      expect(String(r6.first)).to.equal("1:2::");
+      expect(String(r6.last)).to.equal("2:3::4");
+    });
+    it("requires range IPs to be of the same version", () => {
+      expect(IPRange.parse("1.2.3.4-1::2")).to.be.null;
     });
   });
 });
